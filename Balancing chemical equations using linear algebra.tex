@@ -1,0 +1,220 @@
+\documentclass[a4paper]{article}
+
+\usepackage{fullpage} %Bedre margener
+\usepackage{amsfonts,amsmath,amssymb,bm,mathtools, mathabx} %God matematik
+\usepackage{amsthm} %proof-environment til beviser
+\usepackage{array,tabularx,booktabs,authblk,url} %Gode tabeller
+\usepackage{listings} %Til at skrive kode
+\usepackage{algpseudocode,algorithm} %Bruges til at skrive pseudokode til algoritmer
+\usepackage{graphicx} %Tillader brugen af grafik
+\usepackage{tikz} %Bruges til at lave grafik direkte i LaTeX
+\usepackage{sistyle} %SI-enheder
+\usepackage{url} %Tillader brugen af url-hyperlinks
+\usepackage{foekfont} %Tillader brugen af MADS FØKs makroer
+\usepackage{tket} %Tillader brugen af TÅGEKAMMERETs makroer
+\usepackage{chemfig}
+
+%Det følgende hører sammen
+\makeatletter
+\renewcommand*\env@matrix[1][*\c@MaxMatrixCols c]{%
+\hskip -\arraycolsep
+\let\@ifnextchar\new@ifnextchar
+\array{#1}}
+\makeatother
+%Det ovenover tillader dannelsen af lodrette linjer i matricer (gøres på samme måde som med tabeller)
+
+\newcommand{\e}{\mathrm{e}} %Eulers tal
+
+%Diverse talmængder
+\newcommand{\N}{\mathbb{N}} %De naturlige tal
+\newcommand{\Z}{\mathbb{Z}} %Heltallene
+\newcommand{\Q}{\mathbb{Q}} %De rationelle tal
+\newcommand{\A}{\mathbb{A}} %De alǵebraiske tal
+\newcommand{\R}{\mathbb{R}} %De reelle tal
+\newcommand{\I}{\mathbb{I}} %De imaginære tal
+\newcommand{\C}{\mathbb{C}} %De komplekse tal
+\newcommand{\F}{\mathbb{F}} %Et vilkårligt talrum
+
+\title{Balancing chemical equations using linear algebra} % Skriver titel
+\author{Rune N. T. Thorsen - 201505509} % Skriver skribent(er)
+\date{\today} % Indsætter dagens dato
+
+\begin{document}
+\maketitle
+
+Sometimes it can be a bit hard to balance a chemical equation. Using linear algebra and a calculator it can make such a task a lot easier.
+
+\section{A short recap of the maths involved}
+
+Suppose you have $n$ different linear equations with $n$ different variables. Furthermore, suppose that this set of equations can actuallæy be solved, meaning that you could correctly find the value of each of the $n$ variables.
+
+These equations could be written as follows:
+
+\begin{align*}
+	a_{11} x_1 + a_{12} x_2 + \cdots + a_{1n} x_n &= b_1,\\
+	a_{21} x_1 + a_{22} x_2 + \cdots + a_{2n} x_n &= b_2,\\
+	\vdots\\
+	a_{n1} x_1 + a_{n2} x_2 + \cdots + a_{nn} x_n &= b_n.
+\end{align*}
+
+Now doing a notational trick (where the variables $x_{i}$ is left out), one could write these in matrix form:
+
+$$
+\begin{pmatrix}[cccc|c]
+	a_{11} & a_{12} & \cdots & a_{1n} & b_1\\
+	a_{21} & a_{22} & \cdots & a_{2n} & b_2\\
+	\vdots & \vdots & \ddots & \vdots & \vdots\\
+	a_{n1} & a_{n2} & \cdots & a_{nn} & b_n
+\end{pmatrix}.
+$$
+
+Let $A$ be the matrix without the right hand side of each equation:
+
+$$A =
+\begin{pmatrix}
+	a_{11} & a_{12} & \cdots & a_{1n}\\
+	a_{21} & a_{22} & \cdots & a_{2n}\\
+	\vdots & \vdots & \ddots & \vdots\\
+	a_{n1} & a_{n2} & \cdots & a_{nn}
+\end{pmatrix},
+$$
+
+\noindent and $b$ be the vector of values on the right hand side of each equation:
+
+$$b =
+\begin{pmatrix}
+	b_1\\
+	b_2\\
+	\vdots\\
+	b_n
+\end{pmatrix}.
+$$
+
+Now let $I$ denote the identity matrix of size $n$:
+
+$$I =
+\begin{pmatrix}
+1 & 0 & \cdots & 0\\
+0 & 1 & \cdots & 0\\
+\vdots & \vdots & \ddots & \vdots\\
+0 & 0 & \cdots & 1
+\end{pmatrix}.
+$$
+
+\noindent In other words, $I$ has the number 1 on each entry in it's diagonal going from the top left down to the bottom right and 0 on any other entry, with $n$ columns and $n$ rows.
+
+If the matrix $A$ can be broughyt to look like $I$, it is said to be row equivalent to $I$. Likewise $I$ is row equivalent to $A$. It is written
+
+$$A \sim I,$$
+
+\noindent or
+
+$$I \sim A.$$
+
+Since the set of equations can be solved (ie. it is possible to find the value of each $x_i$), it is indeed true, that $A$ is row equivalent to $I$.
+
+Now let $A^{-1}$ be the inverse matrix of $A$, such that:
+
+$$A^{-1} A = I.$$
+
+As it is implied above, it is indeed true, that
+
+$$A = b.$$
+
+Due to how linear algebra works, this means that if
+
+$$A^{-1} A = I$$
+
+\noindent then
+
+$$A^{-1} b$$
+
+\noindent will give a vector, $c$, where the $i$'th entry in $c$ is equal to $x_i$.
+
+If it is unknown if a set of linear equations can be solved, then you could compute the determinant of $A$, denoted $det(A)$ and if this is equal to 0, then the system of linear equations simply cannot be solved. If it can be solved however, then it is true, that
+
+$$det(A) \neq 0.$$
+
+\section{Converting a chemical equation into a set of linear mathematical equations}
+
+In general a chemical equation will look like the following:
+
+\begin{center}
+	\schemestart aA \+ bB \arrow cC \+ dD \schemestop.
+\end{center}
+
+Now it would be interesting to treat this like a set of linear mathematical equations.
+
+In order to do this, we need to apply some rules:
+
+\begin{enumerate}
+	\item When dealing with redox equations, if it takes place in an acidic or in a basic environment, then you should firstly always write $\text{H}^{+}$ or $\text{OH}^{-}$ on the left side of the equation ($\text{H}^{+}$ for an acidic environment and $\text{OH}^{-}$ for a basic environment) and $\text{H}_2\text{O}$ on the right side of the equation,
+	\item Once the above rule has been followed, you must know all reactants and all products of the reaction,
+	\item As variables we will use the the coefficients of each species in the chemical equation,
+	\item A linear mathematical equation is made by letting the reaction arrow show where to put the equal sign,
+	\item There needs to be an equation for each distinct type of atom,
+	\item If the $i$'th chemical species (read from left to right in the chemical equation) contains $k$ of the $j$'th atom in the chemical equation, then $a_{ji} = k$,
+	\item A helper equation is always needed, where the first coefficient is set to 1,
+	\item When dealing with redox equations, an equation is needed to deal with conservation of charge, where the charge of a chemical species is used as the coefficient of the species' coefiicient,
+	\item Once all necessary equations have been generated, the coefficients and their respective coefficients should be moved to the left side of each equation, but the helper equation should not have it's 1 moved ot the left side.
+\end{enumerate}
+
+\subsection{Balancing a normal chemical equations using linear algebra}
+
+In order to balance the chemical equation above, with arbitrary coefficients and compounds you should follow rules 2-7 and rule 8, since rule 1 and rule 8 only apply to redox reactions.
+
+Rule 2 is automatically followed in this case.\\
+Rule 3 dictates, that you will have 4 coefficients in each equation; $a$, $b$, $c$ and $d$.\\
+If we let each of the 4 chemical species be a single atom, except for $\text{B}$, which we let be equal to $\text{B}_2$, then we need 4 equations, one for each distinct type of atom, in accordance with rule 5. In accordance with rule 4 and 6, we let the 4 equations be\footnote{Of course not all sets of equations generated following the rules will be this simple.}:
+
+\begin{align*}
+	1 \cdot a + 0 \cdot b &= 0 \cdot c + 0 \cdot d & \text{for atom $\text{A}$},\\
+	0 \cdot a + 2 \cdot b &= 0 \cdot c + 0 \cdot d & \text{for atom $\text{B}$},\\
+	0 \cdot a + 0 \cdot b &= 1 \cdot c + 0 \cdot d & \text{for atom $\text{C}$},\\
+	0 \cdot a + 0 \cdot b &= 0 \cdot c + 1 \cdot d & \text{for atom $\text{D}$}.
+\end{align*}
+
+Now you need to fulfill rule 7 and thus a 5'th equation is needed:
+
+$$1 \cdot a + 0 \cdot b = 0 \cdot c + 0 \cdot d + 1.$$
+
+Once this is done all that is left is for you to fulfill the last rule, rule number 8. And thus your set of equations should become:
+
+\begin{align*}
+	1 \cdot a + 0 \cdot b + 0 \cdot c + 0 \cdot d = 0,\\
+	0 \cdot a + 2 \cdot b + 0 \cdot c + 0 \cdot d = 0,\\
+	0 \cdot a + 0 \cdot b - 1 \cdot c + 0 \cdot d = 0,\\
+	0 \cdot a + 0 \cdot b + 0 \cdot c - 1 \cdot d = 0,\\
+	1 \cdot a + 0 \cdot b + 0 \cdot c + 0 \cdot d = 1.
+\end{align*}
+
+Now if you let the right side of equation $l$ be the $l$'th entry in the vector $b$ from before and fill the coefficients into a matrix, like you did in $A$ before, then this checmical equation can be checked for solutions as described in section 1\footnote{Please note that even if the set of equations can be solved, this does most certainly not mean, that the chemical reaction can necessarily occur -- there can be rules in chemistry that are not accounted for, that can prohibit the reaction from occuringt.}. If solutions for this chemcical equation exists it can be found as described in section 1\footnote{Note that due to how matrix multiplication works, if the helper equation is set to be the $m$'th equation in the matrix, then the solution vector $c$, from section 1, will have the same entries as the $m$'th column vector in the inverse matrix.}. Once a solution has been found, it may be necessary to multiply each of the coefficients found with some constant, so as to make sure that there is only integers present in the resulting chemical equation.
+
+\subsection{Balancing a redox reaction using linear algebra}
+
+In order to balance a redox reaction, you first need to modify the chemical equation, in accordance with rule 1.
+
+Let's say that the chemical equation looks like the following:
+
+\begin{center}
+	\schemestart aA$^{+}$ \+ bB \arrow cC \+ dD$^{+}$ \schemestop.
+\end{center}
+
+Then it should be changed to
+
+$$
+\begin{cases}
+	\schemestart eH$^{+}$ \+ aA$^{+}$ \+ bB \arrow cC \+ dD$^{+}$ \+ fH$_2$O \schemestop & \text{for an acidic environment},\\
+	\schemestart eOH$^{-}$ \+ aA$^{+}$ \+ bB \arrow cC \+ dD$^{+}$ \+ fH$_2$O \schemestop & \text{for a basic environment}.
+\end{cases}
+$$
+
+The rules 2-7 is now applied and the same equations as before arises, with the exception that now there is also variables for the species that was added by applying rule 1, which also leads to two more equations due to rule 5.
+
+Rule 8 now has to be followed. A new linear equation is made with the $p$'th coefficient set to the charge of the $p$'th chemical species.
+
+Lastly rule 9 has to be followed once again.
+
+Once all this is done the chemical equation can again be balanced using the method described in section 1.
+
+\end{document}
