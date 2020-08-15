@@ -137,6 +137,8 @@ If it is unknown if a set of linear equations can be solved, then you could comp
 
 $$det(A) \neq 0.$$
 
+%%TODO: add a small part about how to calculate the determinant. This can be done recursively.
+
 \section{Converting a chemical equation into a set of linear mathematical equations}
 
 In general a chemical equation will look like the following:
@@ -157,13 +159,13 @@ In order to do this, we need to apply some rules:
 	\item There needs to be an equation for each distinct type of atom,
 	\item If the $i$'th chemical species (read from left to right in the chemical equation) contains $k$ of the $j$'th atom in the chemical equation, then $a_{ji} = k$,
 	\item A helper equation is always needed, where the first coefficient is set to 1,
-	\item When dealing with redox equations, an equation is needed to deal with conservation of charge, where the charge of a chemical species is used as the coefficient of the species' coefiicient,
-	\item Once all necessary equations have been generated, the coefficients and their respective coefficients should be moved to the left side of each equation, but the helper equation should not have it's 1 moved ot the left side.
+	\item When dealing with redox equations, an equation is needed to deal with conservation of charge, where the charge of a chemical species is used as the coefficient of the species' coefficient,
+	\item Once all necessary equations have been generated, the chemical coefficients (the mathematical variables) and their respective (mathematical) coefficients should be moved to the left side of each equation, but the helper equation should not have it's 1 moved to the left side.
 \end{enumerate}
 
 \subsection{Balancing a normal chemical equations using linear algebra}
 
-In order to balance the chemical equation above, with arbitrary coefficients and compounds you should follow rules 2-7 and rule 8, since rule 1 and rule 8 only apply to redox reactions.
+In order to balance the chemical equation above, with arbitrary coefficients and compounds you should follow rules 2-7 and rule 9, since rule 1 and rule 8 only apply to redox reactions.
 
 Rule 2 is automatically followed in this case.\\
 Rule 3 dictates, that you will have 4 coefficients in each equation; $a$, $b$, $c$ and $d$.\\
@@ -180,7 +182,7 @@ Now you need to fulfill rule 7 and thus a 5'th equation is needed:
 
 $$1 \cdot a + 0 \cdot b = 0 \cdot c + 0 \cdot d + 1.$$
 
-Once this is done all that is left is for you to fulfill the last rule, rule number 8. And thus your set of equations should become:
+Once this is done all that is left is for you to fulfill the last rule, rule number 9. And thus your set of equations should become:
 
 \begin{align*}
 	1 \cdot a + 0 \cdot b + 0 \cdot c + 0 \cdot d = 0,\\
@@ -213,7 +215,7 @@ $$
 
 The rules 2-7 is now applied and the same equations as before arises, with the exception that now there is also variables for the species that was added by applying rule 1, which also leads to two more equations due to rule 5.
 
-Rule 8 now has to be followed. A new linear equation is made with the $p$'th coefficient set to the charge of the $p$'th chemical species.
+Rule 8 now has to be followed. A new linear equation is made with the $k$'th coefficient set to the charge of the $k$'th chemical species.
 
 Lastly rule 9 has to be followed once again.
 
